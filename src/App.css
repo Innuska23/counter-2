@@ -2,17 +2,20 @@
   text-align: center;
   justify-content: center;
   display: flex;
-  flex-direction: column;
+  gap: 50px;
   text-align: center;
   justify-content: center;
-  min-width: 200px;
-  background-color: lightgrey;
-  border: 3px solid darkgrey;
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   margin: 0 auto;
+}
+
+.Container {
+  background-color: lightgrey;
+  border: 3px solid darkgrey;
+  min-width: 200px;
   padding: 10px;
   border-radius: 5px;
 }
@@ -25,4 +28,6 @@
   border: 3px solid darkgrey;
   display: flex;
   gap: 10px;
+  justify-content: center;
+  align-items: center;
 }
