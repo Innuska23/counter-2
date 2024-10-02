@@ -1,4 +1,7 @@
 .board {
+  justify-content: center;
+  align-items: center;
+  display: flex;
   background-color: white;
   border-radius: 5px;
   padding: 10px;
