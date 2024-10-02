@@ -14,6 +14,13 @@ function App() {
 
   const isError = startValue < 0 || maxValue <= startValue;
 
+  const disabledIncBtn = !isSet || isError || counter === maxValue;
+  const disabledResetBtn = !isSet || isError || counter === startValue;
+  
+  const valueBoard = !isSet
+    ? "enter values and press 'set'"
+    : counter;
+
   useEffect(() => {
     const loadState = <T extends number | boolean>(key: string, defaultValue: T): T => {
       const value = localStorage.getItem(key);
@@ -50,6 +57,7 @@ function App() {
       setIsSet(true);
     }
   };
+  const setBtnHandler = () => setHandler()
 
   const resetHandler = () => {
     setCounter(startValue);
@@ -77,7 +85,9 @@ function App() {
         />
 
         <div className='ButtonContainer'>
-          <Button onClick={() => setHandler()} disabled={isSet || isError}>
+          <Button
+            onClick={setBtnHandler}
+            disabled={isSet || isError}>
             set
           </Button>
         </div>
@@ -86,7 +96,7 @@ function App() {
 
       <div className="Container">
         <BoardCounter
-          value={!isSet ? `enter values and press 'set'` : counter}
+          value={valueBoard}
           maxValue={maxValue}
           counter={counter}
           startValue={startValue}
@@ -95,13 +105,13 @@ function App() {
         <div className='ButtonContainer'>
           <Button
             onClick={incHandler}
-            disabled={!isSet || isError || counter === maxValue}
+            disabled={disabledIncBtn}
           >
             inc
           </Button>
           <Button
             onClick={resetHandler}
-            disabled={!isSet || isError || counter === startValue}
+            disabled={disabledResetBtn}
           >
             reset
           </Button>
