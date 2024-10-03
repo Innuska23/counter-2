@@ -7,30 +7,28 @@ import { SetCounter } from './components/setCounter/SetCounter';
 import './App.css';
 
 function App() {
-  const [maxValue, setMaxValue] = useState<number>(0);
-  const [startValue, setStartValue] = useState<number>(0);
-  const [counter, setCounter] = useState<number>(0);
-  const [isSet, setIsSet] = useState<boolean>(false);
+  const INITIAL_COUNTER = 0;
+  const INITIAL_MAX_VALUE = 5;
 
-  const isError = startValue < 0 || maxValue <= startValue;
+  type StorageKey = 'maxValue' | 'counter' | 'isSettingMode';
 
-  const disabledIncBtn = !isSet || isError || counter === maxValue;
-  const disabledResetBtn = !isSet || isError || counter === startValue;
-  
-  const valueBoard = !isSet
-    ? "enter values and press 'set'"
-    : counter;
+  const [counter, setCounter] = useState<number>(INITIAL_COUNTER);
+  const [maxValue, setMaxValue] = useState<number>(INITIAL_MAX_VALUE);
+  const [isSettingMode, setIsSettingMode] = useState<boolean>(false);
+
+  const disabledIsEqual = counter === maxValue;
+  const disabledMinus = counter < INITIAL_COUNTER || maxValue < INITIAL_COUNTER;
+  const disabledReset = counter === INITIAL_COUNTER;
 
   useEffect(() => {
-    const loadState = <T extends number | boolean>(key: string, defaultValue: T): T => {
+    const loadState = <T extends number | boolean>(key: StorageKey, defaultValue: T): T => {
       const value = localStorage.getItem(key);
       return value ? JSON.parse(value) : defaultValue;
     };
 
-    setMaxValue(loadState('maxValue', 0));
-    setStartValue(loadState('startValue', 0));
+    setMaxValue(loadState('maxValue', 5));
     setCounter(loadState('counter', 0));
-    setIsSet(loadState('isSet', false));
+    setIsSettingMode(loadState('isSettingMode', false));
   }, []);
 
 
@@ -40,83 +38,68 @@ function App() {
     };
 
     saveState('maxValue', maxValue);
-    saveState('startValue', startValue);
     saveState('counter', counter);
-    saveState('isSet', isSet);
-  }, [maxValue, startValue, counter, isSet])
+    saveState('isSettingMode', isSettingMode);
+  }, [maxValue, counter, isSettingMode])
 
   const incHandler = () => {
     if (counter < maxValue) {
-      setCounter(prevCount => prevCount + 1);
+      setCounter(prevCounter => prevCounter + 1)
     }
-  };
+  }
 
-  const setHandler = () => {
-    if (maxValue > startValue) {
-      setCounter(startValue);
-      setIsSet(true);
-    }
-  };
-  const setBtnHandler = () => setHandler()
+  const resetHandler = () => setCounter(INITIAL_COUNTER);
 
-  const resetHandler = () => {
-    setCounter(startValue);
-    setIsSet(false);
-  };
+  const toggleSettingMode = () => setIsSettingMode(!isSettingMode);
 
-  const handleValueChange = (isMax: boolean) => (newValue: number) => {
-    if (isMax) {
-      setMaxValue(newValue);
-    } else {
-      setStartValue(newValue);
-    }
-    setIsSet(false);
-  };
+  const renderCounterMode = () => (
+    <>
+      <BoardCounter
+        counter={counter}
+        maxValue={maxValue}
+      />
+      <div className='ButtonContainer'>
+        <Button
+          onClick={incHandler}
+          disabled={disabledIsEqual}>
+          inc
+        </Button>
+        <Button
+          onClick={resetHandler}
+          disabled={disabledReset}
+        >
+          reset
+        </Button>
+        <Button
+          onClick={toggleSettingMode}>
+          set
+        </Button>
+      </div>
+    </>
+  );
+
+  const renderSettingMode = () => (
+    <>
+      <SetCounter
+        counter={counter}
+        maxValue={maxValue}
+        setCounter={setCounter}
+        setMaxValue={setMaxValue}
+      />
+      <div className='ButtonContainer'>
+        <Button
+          onClick={toggleSettingMode}
+          disabled={disabledIsEqual || disabledMinus}>
+          set
+        </Button>
+      </div>
+    </>
+  );
 
   return (
     <div className="App">
-
       <div className="Container">
-        <SetCounter
-          maxValue={maxValue}
-          setMaxValue={handleValueChange(true)}
-          setStartValue={handleValueChange(false)}
-          startValue={startValue}
-        />
-
-        <div className='ButtonContainer'>
-          <Button
-            onClick={setBtnHandler}
-            disabled={isSet || isError}>
-            set
-          </Button>
-        </div>
-
-      </div>
-
-      <div className="Container">
-        <BoardCounter
-          value={valueBoard}
-          maxValue={maxValue}
-          counter={counter}
-          startValue={startValue}
-        />
-
-        <div className='ButtonContainer'>
-          <Button
-            onClick={incHandler}
-            disabled={disabledIncBtn}
-          >
-            inc
-          </Button>
-          <Button
-            onClick={resetHandler}
-            disabled={disabledResetBtn}
-          >
-            reset
-          </Button>
-        </div>
-
+        {isSettingMode ? renderSettingMode() : renderCounterMode()}
       </div>
     </div>
   );

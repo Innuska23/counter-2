@@ -4,20 +4,20 @@ import { Input } from "../input/Input";
 import s from './SetCounter.module.css';
 
 type SetCounterPropType = {
-    startValue: number;
+    counter: number;
     maxValue: number;
     setMaxValue: (value: number) => void;
-    setStartValue: (value: number) => void;
+    setCounter: (value: number) => void;
 };
 
 export const SetCounter: FC<SetCounterPropType> = ({
-    startValue,
+    counter,
     maxValue,
     setMaxValue,
-    setStartValue
+    setCounter
 }) => {
-    const [startValueError, setStartValueError] = useState(() => {
-        const savedError = localStorage.getItem('startValueError');
+    const [counterError, setСounterError] = useState(() => {
+        const savedError = localStorage.getItem('counterError');
         return savedError ? JSON.parse(savedError) : false;
     });
 
@@ -26,19 +26,30 @@ export const SetCounter: FC<SetCounterPropType> = ({
         return savedError ? JSON.parse(savedError) : false;
     });
 
-    useEffect(() => {
-        localStorage.setItem('startValueError', JSON.stringify(startValueError));
-    }, [startValueError]);
+    const maxValueChange = (e: ChangeEvent<HTMLInputElement>) => {
+        return setMaxValue(Number(e.currentTarget.value));
+    }
+
+    const counterChange = (e: ChangeEvent<HTMLInputElement>) => {
+        return setCounter(Number(e.currentTarget.value));
+    }
 
     useEffect(() => {
+        localStorage.setItem('counterError', JSON.stringify(counterError));
         localStorage.setItem('maxValueError', JSON.stringify(maxValueError));
-    }, [maxValueError]);
+    }, [counterError, maxValueError]);
+
+    useEffect(() => {
+        const equalValues = checkEqualValues(counter, maxValue);
+        setMaxValueError(checkMaxValueError(maxValue, counter) || equalValues);
+        setСounterError(checkСounterError(counter, maxValue) || equalValues);
+    }, [counter, maxValue]);
 
     const checkMaxValueError = (max: number, start: number) => {
         return max < start || max < 0;
     };
 
-    const checkStartValueError = (start: number, max: number) => {
+    const checkСounterError = (start: number, max: number) => {
         return start > max || start < 0;
     };
 
@@ -47,26 +58,10 @@ export const SetCounter: FC<SetCounterPropType> = ({
     };
 
     useEffect(() => {
-        const areEqual = checkEqualValues(startValue, maxValue);
-        setMaxValueError(checkMaxValueError(maxValue, startValue) || areEqual);
-        setStartValueError(checkStartValueError(startValue, maxValue) || areEqual);
-    }, [startValue, maxValue]);
-
-    const maxValueChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const newMaxValue = Number(e.currentTarget.value);
-        setMaxValue(newMaxValue);
-        const areEqual = checkEqualValues(startValue, newMaxValue);
-        setMaxValueError(checkMaxValueError(newMaxValue, startValue) || areEqual);
-        setStartValueError(areEqual);
-    };
-
-    const startValueChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const newStartValue = Number(e.currentTarget.value);
-        setStartValue(newStartValue);
-        const areEqual = checkEqualValues(newStartValue, maxValue);
-        setStartValueError(checkStartValueError(newStartValue, maxValue) || areEqual);
-        setMaxValueError(areEqual);
-    };
+        const areEqual = checkEqualValues(counter, maxValue);
+        setMaxValueError(checkMaxValueError(maxValue, counter) || areEqual);
+        setСounterError(checkСounterError(counter, maxValue) || areEqual);
+    }, [counter, maxValue]);
 
     return (
         <div className={s.board}>
@@ -84,9 +79,9 @@ export const SetCounter: FC<SetCounterPropType> = ({
                 <span>start value: </span>
                 <Input
                     type="number"
-                    value={startValue}
-                    onChange={startValueChange}
-                    error={startValueError}
+                    value={counter}
+                    onChange={counterChange}
+                    error={counterError}
                 />
             </div>
         </div>

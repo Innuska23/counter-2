@@ -10,6 +10,7 @@
   border: 3px solid darkgrey;
   min-height: 96px;
   box-sizing: border-box;
+  min-height: 125px;
 }
 
 .maxNumber {
@@ -17,8 +18,10 @@
 }
 
 .textBoard {
-  font-size: 16px;
+  font-size: 24px;
 }
+/* 
+
 
 .board {
   justify-content: center;
@@ -44,4 +47,4 @@
 
 .error {
   color: red;
-}
+} */
