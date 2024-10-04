@@ -1,38 +1,49 @@
 import { ChangeEvent, FC, useState, useEffect } from "react";
-import { Input } from "../input/Input";
 
+import { Input } from "../input/Input";
 import s from './SetCounter.module.css';
 
-type SetCounterPropType = {
+type SetCounterProps = {
     counter: number;
     maxValue: number;
     setMaxValue: (value: number) => void;
     setCounter: (value: number) => void;
 };
 
-export const SetCounter: FC<SetCounterPropType> = ({
+export const SetCounter: FC<SetCounterProps> = ({
     counter,
     maxValue,
     setMaxValue,
     setCounter
 }) => {
-    const [counterError, setСounterError] = useState(() => {
-        const savedError = localStorage.getItem('counterError');
-        return savedError ? JSON.parse(savedError) : false;
-    });
+    const getInitialState = (key: string) => {
+        const savedValue = localStorage.getItem(key);
+        return savedValue ? JSON.parse(savedValue) : false;
+    };
 
-    const [maxValueError, setMaxValueError] = useState(() => {
-        const savedError = localStorage.getItem('maxValueError');
-        return savedError ? JSON.parse(savedError) : false;
-    });
+    const [counterError, setCounterError] = useState(() => getInitialState('counterError'));
+    const [maxValueError, setMaxValueError] = useState(() => getInitialState('maxValueError'));
 
-    const maxValueChange = (e: ChangeEvent<HTMLInputElement>) => {
-        return setMaxValue(Number(e.currentTarget.value));
-    }
+    const isMaxValueError = (max: number, start: number) => max < start || max < 0;
+    const isCounterError = (start: number, max: number) => start > max || start < 0;
+    const areValuesEqual = (start: number, max: number) => start === max;
 
-    const counterChange = (e: ChangeEvent<HTMLInputElement>) => {
-        return setCounter(Number(e.currentTarget.value));
-    }
+    const updateErrors = () => {
+        const equalValues = areValuesEqual(counter, maxValue);
+        const newMaxValueError = isMaxValueError(maxValue, counter) || equalValues;
+        const newCounterError = isCounterError(counter, maxValue) || equalValues;
+
+        setMaxValueError(newMaxValueError);
+        setCounterError(newCounterError);
+    };
+
+    const handleMaxValueChange = (e: ChangeEvent<HTMLInputElement>) => {
+        setMaxValue(Number(e.currentTarget.value));
+    };
+
+    const handleCounterChange = (e: ChangeEvent<HTMLInputElement>) => {
+        setCounter(Number(e.currentTarget.value));
+    };
 
     useEffect(() => {
         localStorage.setItem('counterError', JSON.stringify(counterError));
@@ -40,27 +51,8 @@ export const SetCounter: FC<SetCounterPropType> = ({
     }, [counterError, maxValueError]);
 
     useEffect(() => {
-        const equalValues = checkEqualValues(counter, maxValue);
-        setMaxValueError(checkMaxValueError(maxValue, counter) || equalValues);
-        setСounterError(checkСounterError(counter, maxValue) || equalValues);
-    }, [counter, maxValue]);
-
-    const checkMaxValueError = (max: number, start: number) => {
-        return max < start || max < 0;
-    };
-
-    const checkСounterError = (start: number, max: number) => {
-        return start > max || start < 0;
-    };
-
-    const checkEqualValues = (start: number, max: number) => {
-        return start === max;
-    };
-
-    useEffect(() => {
-        const areEqual = checkEqualValues(counter, maxValue);
-        setMaxValueError(checkMaxValueError(maxValue, counter) || areEqual);
-        setСounterError(checkСounterError(counter, maxValue) || areEqual);
+        updateErrors();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [counter, maxValue]);
 
     return (
@@ -70,7 +62,7 @@ export const SetCounter: FC<SetCounterPropType> = ({
                 <Input
                     type="number"
                     value={maxValue}
-                    onChange={maxValueChange}
+                    onChange={handleMaxValueChange}
                     error={maxValueError}
                 />
             </div>
@@ -80,7 +72,7 @@ export const SetCounter: FC<SetCounterPropType> = ({
                 <Input
                     type="number"
                     value={counter}
-                    onChange={counterChange}
+                    onChange={handleCounterChange}
                     error={counterError}
                 />
             </div>
